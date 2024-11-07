@@ -3,3 +3,4 @@ streamlit
 numpy
 plotly
 matplotlib
+matplotlib.pyplot
