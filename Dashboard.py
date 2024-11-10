@@ -37,11 +37,11 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-data = pd.read_csv('kidney_disease_cleaned1.csv')  # Path to your CKD dataset
+data = pd.read_csv(r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\kidney_disease_cleaned1.csv')  # Path to your CKD dataset
 data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']] = data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']].fillna('unknown')
 
-st.sidebar.image('image.png')
-page = st.sidebar.selectbox("Select a Page", ["Key Feature Indicators", "Numerical Feature Comparison", "Categorical Feature Comparison"])
+st.sidebar.image(r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\image.png')
+page = st.sidebar.selectbox("Select a Page", ["Key Feature Indicators", "Numerical Feature Comparison", "Categorical Feature Comparison", "Prediction"])
 
 with st.sidebar.form("Options"):  # Change from 'form1' to 'st.sidebar.form'
     st.header("Filters")
@@ -77,6 +77,22 @@ with st.sidebar.form("Options"):  # Change from 'form1' to 'st.sidebar.form'
     ane_filter = st.multiselect("Anemia", ane_select, default=ane_select)
 
     form_submit = st.form_submit_button("Apply")
+
+if form_submit:
+    filtered_data = data[
+        (data['htn'].isin(htn_filter)) &
+        (data['dm'].isin(dm_filter)) &
+        (data['ane'].isin(ane_filter)) &
+        (data['pe'].isin(pe_filter)) &
+        (data['rbc'].isin(rbc_filter)) &
+        (data['appet'].isin(appet_filter)) &
+        (data['pc'].isin(pc_filter)) &
+        (data['pcc'].isin(pcc_filter)) &
+        (data['ba'].isin(ba_filter)) &
+        (data['cad'].isin(cad_filter))
+        ]
+else:
+    filtered_data = data
 
 if page == "Key Feature Indicators":
     st.title("Key Feature Indicators")
