@@ -290,7 +290,7 @@ elif page == "Categorical Feature Comparison":
 
 elif page == "Prediction":
     df = pd.read_csv(
-        r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\kidney_disease_cleaned3.csv')
+        'kidney_disease_cleaned3.csv')
     train, test = train_test_split(df, test_size=0.2, random_state=42)
     train.reset_index(drop=True, inplace=True)
     test.reset_index(drop=True, inplace=True)
