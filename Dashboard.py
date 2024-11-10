@@ -293,7 +293,7 @@ elif page == "Categorical Feature Comparison":
 
 elif page == "Prediction":
     df = pd.read_csv(
-        'kidney_disease_cleaned3.csv')
+        'kidney_disease_cleaned2.csv')
     train, test = train_test_split(df, test_size=0.2, random_state=42)
     train.reset_index(drop=True, inplace=True)
     test.reset_index(drop=True, inplace=True)
@@ -367,16 +367,16 @@ elif page == "Prediction":
     rc = st.number_input("Red Blood Cell Count", min_value=0.0, max_value=100.0)
 
     # Categorical fields as dropdowns
-    rbc = st.selectbox("Red Blood Cell Clusters", ['normal', 'abnormal', 'unknown'])
-    pc = st.selectbox("Pus Cell", ['normal', 'abnormal', 'unknown'])
-    pcc = st.selectbox("Pus Cell Clumps", ['normal', 'abnormal', 'unknown'])
-    ba = st.selectbox("Bacteria", ['not present', 'present', 'unknown'])
-    htn = st.selectbox("Hypertension", ['yes', 'no', 'unknown'])
-    dm = st.selectbox("Diabetes Mellitus", ['yes', 'no', 'unknown'])
-    cad = st.selectbox("Coronary Artery Disease", ['yes', 'no', 'unknown'])
-    appet = st.selectbox("Appetite", ['good', 'poor', 'unknown'])
-    pe = st.selectbox("Pedal Edema", ['yes', 'no', 'unknown'])
-    ane = st.selectbox("Anemia", ['yes', 'no', 'unknown'])
+    rbc = st.selectbox("Red Blood Cell Clusters", ['normal', 'abnormal'])
+    pc = st.selectbox("Pus Cell", ['normal', 'abnormal'])
+    pcc = st.selectbox("Pus Cell Clumps", ['normal', 'abnormal'])
+    ba = st.selectbox("Bacteria", ['not present', 'present'])
+    htn = st.selectbox("Hypertension", ['yes', 'no'])
+    dm = st.selectbox("Diabetes Mellitus", ['yes', 'no'])
+    cad = st.selectbox("Coronary Artery Disease", ['yes', 'no'])
+    appet = st.selectbox("Appetite", ['good', 'poor'])
+    pe = st.selectbox("Pedal Edema", ['yes', 'no'])
+    ane = st.selectbox("Anemia", ['yes', 'no'])
 
 
     # Define the prediction function
