@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OrdinalEncoder, MinMaxScaler, LabelEncoder
+from sklearn.ensemble import RandomForestClassifier
 
 st.markdown(
     """
