@@ -44,7 +44,7 @@ data = pd.read_csv('kidney_disease_cleaned1.csv')  # Path to your CKD dataset
 data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']] = data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']].fillna('unknown')
 
 st.sidebar.image('image.png')
-page = st.sidebar.selectbox("Select a Page", ["Key Feature Indicators", "Numerical Feature Comparison", "Categorical Feature Comparison", "Prediction"])
+page = st.sidebar.selectbox("Select a Page", ["Key Feature Indicators", "Key Health Indicators", "Risk Factors", "CKD Prediction"])
 
 with st.sidebar.form("Options"):  # Change from 'form1' to 'st.sidebar.form'
     st.header("Filters")
@@ -176,7 +176,7 @@ if page == "Key Feature Indicators":
         #st.dataframe(counts_df)
 
 
-elif page == "Numerical Feature Comparison":
+elif page == "Key Health Indicators":
     st.title("Comparative Analysis of Key Health Indicators by CKD Classification")
 
     col1, col2, col3 = st.columns([3,2,3])
@@ -232,7 +232,7 @@ elif page == "Numerical Feature Comparison":
         st.dataframe(df_transposed3.style.format("{:.2f}"))
 
 
-elif page == "Categorical Feature Comparison":
+elif page == "Risk Factors":
     st.title("CKD Risk Factors: Albumin, Suger Level and Specific Gravity")
 
     col1, col2 = st.columns(2)
@@ -291,7 +291,7 @@ elif page == "Categorical Feature Comparison":
 
         st.pyplot(plt)
 
-elif page == "Prediction":
+elif page == "CKD Prediction":
     df = pd.read_csv(
         'kidney_disease_cleaned2.csv')
     train, test = train_test_split(df, test_size=0.2, random_state=42)
