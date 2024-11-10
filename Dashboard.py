@@ -120,14 +120,8 @@ if page == "Key Feature Indicators":
     # KPI 2: Age Group Distribution of CKD Positive Cases
     with col2:
         age_groups = pd.cut(filtered_data['age'], bins=range(0, 101, 10))
-        age_group_counts = filtered_data[filtered_data['classification'] == 'CKD Possitve'].groupby(age_groups).size()
-        fig2, ax2 = plt.subplots(figsize=(6, 6))
-        age_group_counts.plot(kind='bar', color='royalblue', ax=ax2)
-        ax2.set_title("CKD Positive Cases by Age Range")
-        ax2.set_xlabel("Age Range")
-        ax2.set_ylabel("Count")
-        #st.pyplot(fig2)
 
+        # Total count of people in each age group
         total_counts = filtered_data.groupby(age_groups).size()
 
         # CKD Positive count in each age group
@@ -138,10 +132,7 @@ if page == "Key Feature Indicators":
         counts_df = pd.DataFrame({
             'Total Count': total_counts,
             'CKD Positive Count': ckd_positive_counts
-        })  # Fill NaNs with 0 for age groups with no CKD positive cases
-
-        counts_df = counts_df.reset_index()
-        counts_df.rename(columns={'age': 'Age Group'}, inplace=True)
+        }).fillna(0)  # Fill NaNs with 0 for age groups with no CKD positive cases
 
         # Plotting
         fig, ax = plt.subplots(figsize=(8, 6))
