@@ -37,7 +37,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-data = pd.read_csv(r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\kidney_disease_cleaned1.csv')  # Path to your CKD dataset
+data = pd.read_csv('kidney_disease_cleaned1.csv')  # Path to your CKD dataset
 data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']] = data[['rbc', 'pc', 'pcc', 'ba', 'htn', 'dm', 'cad', 'appet', 'pe', 'ane']].fillna('unknown')
 
 st.sidebar.image(r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\image.png')
