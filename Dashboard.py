@@ -78,22 +78,6 @@ with st.sidebar.form("Options"):  # Change from 'form1' to 'st.sidebar.form'
 
     form_submit = st.form_submit_button("Apply")
 
-if form_submit:
-    filtered_data = data[
-        (data['htn'].isin(htn_filter)) &
-        (data['dm'].isin(dm_filter)) &
-        (data['ane'].isin(ane_filter)) &
-        (data['pe'].isin(pe_filter)) &
-        (data['rbc'].isin(rbc_filter)) &
-        (data['appet'].isin(appet_filter)) &
-        (data['pc'].isin(pc_filter)) &
-        (data['pcc'].isin(pcc_filter)) &
-        (data['ba'].isin(ba_filter)) &
-        (data['cad'].isin(cad_filter))
-        ]
-else:
-    filtered_data = data
-
 if page == "Key Feature Indicators":
     st.title("Key Feature Indicators")
     st.subheader("CKD Distribution")
@@ -123,11 +107,58 @@ if page == "Key Feature Indicators":
         ax2.set_title("CKD Positive Cases by Age Range")
         ax2.set_xlabel("Age Range")
         ax2.set_ylabel("Count")
-        st.pyplot(fig2)
+        #st.pyplot(fig2)
+
+        total_counts = filtered_data.groupby(age_groups).size()
+
+        # CKD Positive count in each age group
+        ckd_positive_counts = filtered_data[filtered_data['classification'] == 'CKD Possitve'].groupby(
+            age_groups).size()
+
+        # Combine the counts into a DataFrame for easier plotting and display
+        counts_df = pd.DataFrame({
+            'Total Count': total_counts,
+            'CKD Positive Count': ckd_positive_counts
+        })  # Fill NaNs with 0 for age groups with no CKD positive cases
+
+        counts_df = counts_df.reset_index()
+        counts_df.rename(columns={'age': 'Age Group'}, inplace=True)
+
+        # Plotting
+        fig, ax = plt.subplots(figsize=(8, 6))
+
+        # Plot total counts in the background (pink)
+        counts_df['Total Count'].plot(kind='bar', color='pink', ax=ax, width=0.8, label='Total Count')
+
+        # Plot CKD positive counts in the foreground (blue)
+        counts_df['CKD Positive Count'].plot(kind='bar', color='royalblue', ax=ax, width=0.4,
+                                             label='CKD Positive Count')
+
+        # Adding labels above bars
+        for i in range(len(counts_df)):
+            # Positioning the total count label (pink) slightly above the bar
+            ax.text(i, counts_df['Total Count'].iloc[i] + 0.5, int(counts_df['Total Count'].iloc[i]),
+                    ha='center', va='bottom', color='pink', fontweight='bold')
+            # Positioning the CKD positive count label (blue) slightly above the bar
+            ax.text(i, counts_df['CKD Positive Count'].iloc[i] + 0.5, int(counts_df['CKD Positive Count'].iloc[i]),
+                    ha='center', va='bottom', color='royalblue', fontweight='bold')
+
+        # Chart formatting
+        ax.set_title("CKD Positive Cases by Age Range")
+        ax.set_xlabel("Age Range")
+        ax.set_ylabel("Count")
+        ax.legend()
+
+        # Display the chart in Streamlit
+        st.pyplot(fig)
+
+        # Display the counts as a table in Streamlit
+        #st.write("### Age Group Counts")
+        #st.dataframe(counts_df)
 
 
 elif page == "Numerical Feature Comparison":
-    st.title("Numerical Feature Comparison: CKD Positive vs. Negative")
+    st.title("Comparative Analysis of Key Health Indicators by CKD Classification")
 
     col1, col2, col3 = st.columns([3,2,3])
 
@@ -183,7 +214,7 @@ elif page == "Numerical Feature Comparison":
 
 
 elif page == "Categorical Feature Comparison":
-    st.title("Analysis of Albumin, Suger Level and Specific Gravity")
+    st.title("CKD Risk Factors: Albumin, Suger Level and Specific Gravity")
 
     col1, col2 = st.columns(2)
 
@@ -193,7 +224,7 @@ elif page == "Categorical Feature Comparison":
         filtered_counts = filtered_data[condition]['classification'].value_counts()
         filtered_percentages = round((filtered_counts / filtered_data['classification'].value_counts().loc[
             'CKD Possitve']) * 100, 2)
-        st.subheader("CKD Classification Where, AL = 0, SU = 0, and SG > 1.015")
+        st.subheader("CKD Classification Analysis for Cases with AL = 0, SU = 0, and SG > 1.015")
         st.metric("Count", filtered_counts)
         st.metric("Percentage (%)", filtered_percentages)
         # st.dataframe(result_table)
@@ -241,14 +272,116 @@ elif page == "Categorical Feature Comparison":
 
         st.pyplot(plt)
 
+elif page == "Prediction":
+    df = pd.read_csv(
+        r'C:\Users\Rukmal\PycharmProjects\pythonProject\Internship\Project_CKD\kidney_disease_cleaned3.csv')
+    train, test = train_test_split(df, test_size=0.2, random_state=42)
+    train.reset_index(drop=True, inplace=True)
+    test.reset_index(drop=True, inplace=True)
 
-        # Combine the counts and percentages into a DataFrame for display
-        #result_table = pd.DataFrame({
-            #"Count": filtered_counts,
-            #"Percentage (%)": filtered_percentages
-        #}).reset_index()
+    # Feature and target variables
+    X_train = train.drop('classification', axis=1)
+    y_train = train['classification']
+    X_test = test.drop('classification', axis=1)
+    y_test = test['classification']
 
-        # Rename columns for clarity
-        #result_table = result_table.rename(columns={'index': 'Classification'})
+    # Preprocess data: Separate categorical and numerical features
+    cat = []
+    num = []
 
-        # Display the table in Streamlit
+    for col in X_train.columns:
+        if X_train[col].dtype == 'object':
+            cat.append(col)
+        else:
+            num.append(col)
+
+    # Encode categorical variables
+    enc = OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)
+    encoded_data = enc.fit_transform(X_train[cat])
+    encoded_df = pd.DataFrame(encoded_data, columns=cat)
+    X_train = pd.concat([X_train[num], encoded_df], axis=1)
+
+    encoded_data2 = enc.transform(X_test[cat])
+    encoded_df2 = pd.DataFrame(encoded_data2, columns=cat)
+    X_test = pd.concat([X_test[num], encoded_df2], axis=1)
+
+    # Store column names before scaling
+    cols = X_train.columns
+
+    # Normalize data
+    scaler = MinMaxScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_train = pd.DataFrame(X_train, columns=cols)
+
+    X_test = scaler.transform(X_test)
+    X_test = pd.DataFrame(X_test, columns=cols)
+
+    # Label encode target variable
+    le = LabelEncoder()
+    y_train = le.fit_transform(y_train)
+    y_test = le.transform(y_test)
+
+    # Define RandomForest model
+    model = RandomForestClassifier()
+
+    # Train the model
+    model.fit(X_train, y_train)
+
+    # Streamlit interface
+    st.title("Kidney Disease Prediction")
+    st.write("### Enter Patient Data for Prediction")
+
+    # Input fields
+    age = st.number_input("Age", min_value=0, max_value=200)
+    bp = st.number_input("Blood Pressure", min_value=0, max_value=500)
+    sg = st.number_input("Specific Gravity", min_value=1.00, max_value=2.00)
+    al = st.number_input("Albumin", min_value=0, max_value=10)
+    su = st.number_input("Sugar Level", min_value=0, max_value=10)
+    bgr = st.number_input("Blood Glucose", min_value=0, max_value=2000)
+    bu = st.number_input("Blood Urea", min_value=0, max_value=2000)
+    sc = st.number_input("Serum Creatine", min_value=0.0, max_value=1000.0)
+    sod = st.number_input("Sodium", min_value=0, max_value=2000)
+    pot = st.number_input("Potassium", min_value=0.0, max_value=1000.0)
+    hemo = st.number_input("Hemoglobin", min_value=0.0, max_value=200.0)
+    pcv = st.number_input("Packed Cell Volume", min_value=0.0, max_value=100.0)
+    wc = st.number_input("White Blood Cell Count", min_value=0.0, max_value=100000.0)
+    rc = st.number_input("Red Blood Cell Count", min_value=0.0, max_value=100.0)
+
+    # Categorical fields as dropdowns
+    rbc = st.selectbox("Red Blood Cell Clusters", ['normal', 'abnormal', 'unknown'])
+    pc = st.selectbox("Pus Cell", ['normal', 'abnormal', 'unknown'])
+    pcc = st.selectbox("Pus Cell Clumps", ['normal', 'abnormal', 'unknown'])
+    ba = st.selectbox("Bacteria", ['not present', 'present', 'unknown'])
+    htn = st.selectbox("Hypertension", ['yes', 'no', 'unknown'])
+    dm = st.selectbox("Diabetes Mellitus", ['yes', 'no', 'unknown'])
+    cad = st.selectbox("Coronary Artery Disease", ['yes', 'no', 'unknown'])
+    appet = st.selectbox("Appetite", ['good', 'poor', 'unknown'])
+    pe = st.selectbox("Pedal Edema", ['yes', 'no', 'unknown'])
+    ane = st.selectbox("Anemia", ['yes', 'no', 'unknown'])
+
+
+    # Define the prediction function
+    def predict(model):
+        data = [age, bp, sg, al, su, bgr, bu, sc, sod, pot, hemo, pcv, wc, rc, rbc, pc, pcc, ba, htn, dm, cad, appet,
+                pe, ane]
+        data = np.array(data).reshape(1, -1)
+        df_input = pd.DataFrame(data, columns=X_train.columns)
+
+        # Preprocess the input data (similar to training data)
+        encoded_input = enc.transform(df_input[cat])
+        encoded_df_input = pd.DataFrame(encoded_input, columns=cat)
+        df_input = pd.concat([df_input[num], encoded_df_input], axis=1)
+        df_input = scaler.transform(df_input)
+        df_input = pd.DataFrame(df_input, columns=cols)
+
+        # Make prediction
+        prediction = model.predict(df_input)
+        prediction_label = le.inverse_transform(prediction)[0]
+
+        return prediction_label
+
+
+    # Button to trigger prediction
+    if st.button("Predict"):
+        prediction_result = predict(model)
+        st.write(f"The prediction result is: {prediction_result}")
